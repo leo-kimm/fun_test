@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -64,6 +64,48 @@
     /* Algorithm Section */
     .algo-box{ margin-top: 40px; border: 1px solid var(--line); border-radius: 16px; padding: 20px; font-size: 13px; color: var(--muted); }
     .btn-retry{ width: 100%; margin-top: 30px; background: var(--accent); color: #000; border: none; padding: 18px; border-radius: 14px; font-weight: 800; cursor: pointer; }
+
+  .badge-btn{
+    background: transparent;
+    color: inherit;
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor: pointer;
+  }
+  .badge-btn:hover{ border-color: var(--accent); }
+
+  /* Modal */
+  .modal-backdrop{
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+  }
+  .modal{
+    width: min(560px, 100%);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    padding: 18px;
+  }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 12px; margin-bottom: 8px;
+  }
+  .modal-title{ font-weight: 800; font-size: 16px; }
+  .modal-close{
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+  .modal-body{ color: var(--muted); font-size: 14px; line-height: 1.7; }
+  .modal-kv{ margin-top: 10px; padding: 12px; border: 1px dashed var(--line); border-radius: 12px; color: var(--text); }
   </style>
 </head>
 <body>
@@ -117,6 +159,16 @@
         <button class="btn-retry" onclick="location.reload()">테스트 다시하기</button>
       </div>
     </div>
+      <div id="label-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="label-modal-title">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="label-modal-title">설명</div>
+        <button class="modal-close" type="button" onclick="closeLabelModal()">닫기</button>
+      </div>
+      <div class="modal-body" id="label-modal-body"></div>
+      <div class="modal-kv" id="label-modal-kv" style="display:none;"></div>
+    </div>
+  </div>
   </div>
 
   <script>
@@ -143,7 +195,61 @@
       "WATER_YIN_ACCEPT": { hl: "큰 흐름 속에서 자연스러운 답을 기다리는 ‘대세 관조형’", desc: "당신은 급하게 결론내기보다, 전체 그림이 맞춰질 때까지 기다립니다. 사주적으로 깊은 수가 수용과 결합되면 “장기 최적”에 강해요. 다만 결정이 늦어질 수 있습니다.", s: ["큰 그림", "안정적인 판단"], sh: "결정을 미루다 기회가 지나갈 수 있다", adv: "완벽한 타이밍을 기다리기보다 ‘작은 실행’으로 흐름을 먼저 만들기." }
     };
 
+    const LABEL_DETAILS = {
+      WOOD:  { title:"🌱 목(木) — 확장/성장 엔진", body:"새 판을 열고 가능성을 키우는 쪽에 에너지가 붙습니다. ‘시작·확장·학습 곡선’이 빠른 편이며, 성과는 커지기 쉬우나 속도 조절이 과제가 되기도 합니다.", kv:"잘 맞는 환경: 신사업/프로토타입/확장 국면 · 주의: 번아웃, 과속" },
+      FIRE:  { title:"🔥 화(火) — 표현/영향 엔진", body:"사람과 장면에서 에너지가 올라옵니다. 설득·분위기·리더십에 강하고 반응을 통해 속도가 붙습니다. 다만 과열되면 말/행동이 앞설 수 있습니다.", kv:"잘 맞는 환경: 발표/세일즈/리딩 · 주의: 과열, 피로 누적" },
+      EARTH: { title:"🪨 토(土) — 안정/운영 엔진", body:"흔들리는 상황을 ‘돌아가게’ 만드는 힘이 큽니다. 조율·운영·리스크 완충에 강하고 팀의 바닥을 깔아줍니다. 다만 떠안는 구조가 되면 지칠 수 있어요.", kv:"잘 맞는 환경: 운영/PMO/조율 · 주의: 과책임, 통제적으로 비침" },
+      METAL: { title:"⚙️ 금(金) — 기준/정리 엔진", body:"애매함을 정리하고 기준을 세우는 데 강합니다. 결론·품질·리스크 관리에 장점이 있고, 시스템/규칙을 만들기 좋습니다. 다만 직설이 차갑게 들릴 수 있어요.", kv:"잘 맞는 환경: QA/거버넌스/프로세스 · 주의: 날카로움, 완벽주의" },
+      WATER: { title:"🌊 수(水) — 맥락/전략 엔진", body:"흐름을 읽고 타이밍을 잡습니다. 성급한 결론보다 ‘더 나은 판단’에 강하고, 변화 속에서 생존력이 좋습니다. 다만 결정을 미루면 기회를 놓칠 수 있어요.", kv:"잘 맞는 환경: 전략/분석/탐색 · 주의: 결정 지연, 우유부단 오해" },
+
+      YANG: { title:"양(陽) — 밖으로 드러나는 추진", body:"생각·에너지가 밖으로 빠르게 표현되는 편입니다. 먼저 말하고 먼저 움직이며, 주변을 끌어당기는 힘이 있습니다.", kv:"장점: 속도/존재감 · 주의: 과속/충돌" },
+      YIN:  { title:"음(陰) — 안에서 다지는 축적", body:"티를 덜 내고 내부에서 정리·축적 후 움직입니다. 준비와 완성도에 강하고, 한번 가속이 붙으면 오래 갑니다.", kv:"장점: 안정/정교함 · 주의: 시작 지연/오해" },
+
+      DRIVE:  { title:"추진형(Drive) — 내가 먼저 바꾼다", body:"답답하면 직접 움직여 판을 바꾸는 성향입니다. 실행력이 강하고 책임을 질 각오가 빠릅니다.", kv:"장점: 결정/돌파 · 주의: 독주/번아웃" },
+      ACCEPT: { title:"수용형(Accept) — 흐름을 읽고 맞춘다", body:"상황을 읽고 조정하며 최적 타이밍을 잡는 성향입니다. 변화 대응과 관계/환경 적응이 강합니다.", kv:"장점: 유연/조율 · 주의: 기준 흔들림/결정 지연" }
+    };
+
+    function openLabelModal(key){
+      const modal = document.getElementById("label-modal");
+      const t = document.getElementById("label-modal-title");
+      const b = document.getElementById("label-modal-body");
+      const kv = document.getElementById("label-modal-kv");
+
+      const d = LABEL_DETAILS[key];
+      if(!d) return;
+
+      t.textContent = d.title;
+      b.textContent = d.body;
+
+      if(d.kv){
+        kv.style.display = "block";
+        kv.textContent = d.kv;
+      }else{
+        kv.style.display = "none";
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeLabelModal(){
+      document.getElementById("label-modal").style.display = "none";
+    }
+
+    window.addEventListener("click", (e) => {
+      const modal = document.getElementById("label-modal");
+      if(e.target === modal) closeLabelModal();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") closeLabelModal();
+    });
+
+
+
+
+
     const QUESTIONS = [
+{
     id: "Q1",
     title: "새로운 환경에 던져졌을 때, 가장 먼저 드는 생각은?",
     options: [
@@ -219,8 +325,8 @@
       "Q5_A": { elements:{WATER:1} }, "Q5_B": { elements:{WOOD:1} }, "Q5_C": { elements:{EARTH:1} }, "Q5_D": { elements:{METAL:1} },
       "Q6_A": { elements:{WOOD:1} }, "Q6_B": { elements:{FIRE:1} }, "Q6_C": { elements:{EARTH:1} }, "Q6_D": { elements:{WATER:1} },
       "Q7_A": { yinYang:{YANG:1} }, "Q7_B": { yinYang:{YIN:1} }, "Q8_A": { yinYang:{YANG:1} }, "Q8_B": { yinYang:{YIN:1} },
-      "Q9_A": { engine:{DRIVE:1} }, "Q9_B": { engine:{ACCEPT:1} }, "Q10_A": { engine:{DRIVE:1} }, "Q10_B": { engine:{ACCEPT:1} },
-      "Q11_A": { elements:{WOOD:0.5, FIRE:0.5, WATER:0.5}, engine:{DRIVE:0.5}, yinYang:{YANG:0.25} }, "Q11_B": { elements:{EARTH:0.5, METAL:0.5}, engine:{ACCEPT:0.25} },
+      "Q9_A": { engine:{DRIVE:1},  elements:{METAL:0.5}}, "Q9_B": { engine:{ACCEPT:1},elements:{WATER:0.5} }, "Q10_A": { engine:{DRIVE:1}, elements:{METAL:1}}, "Q10_B": { engine:{ACCEPT:1},elements:{WATER:1} },
+      "Q11_A": { elements:{WOOD:0.5, FIRE:0.5}, engine:{DRIVE:0.5}, yinYang:{YANG:0.25} }, "Q11_B": { elements:{EARTH:0.5, METAL:0.5}, engine:{ACCEPT:0.25} },
       "Q12_A": { yinYang:{YANG:1}, engine:{DRIVE:0.5} }, "Q12_B": { yinYang:{YIN:1}, engine:{ACCEPT:0.5} }
     };
 
@@ -289,10 +395,19 @@
 
       const badges = document.getElementById("res-badges");
       badges.innerHTML = `
-        <span class="badge" style="color:var(--${res.el.toLowerCase()}); border-color:var(--${res.el.toLowerCase()})">${res.elLabel}</span>
-        <span class="badge">${res.yyLabel}</span>
-        <span class="badge">${res.engLabel}</span>
+        <button type="button" class="badge badge-btn"
+          style="color:var(--${res.el.toLowerCase()}); border-color:var(--${res.el.toLowerCase()})"
+          onclick="openLabelModal('${res.el}')">
+          ${res.elLabel}
+        </button>
+        <button type="button" class="badge badge-btn" onclick="openLabelModal('${res.yy}')">
+          ${res.yyLabel}
+        </button>
+        <button type="button" class="badge badge-btn" onclick="openLabelModal('${res.eng}')">
+          ${res.engLabel}
+        </button>
       `;
+
       
       document.getElementById("res-section").style.display = "block";
     }
@@ -328,13 +443,14 @@
       };
 
       return {
-        code: `${finalEl}_${finalYY}_${finalEng}`, el: finalEl,
+        code: `${finalEl}_${finalYY}_${finalEng}`,
+        el: finalEl, yy: finalYY, eng: finalEng,
         elLabel: labels[finalEl], yyLabel: labels[finalYY], engLabel: labels[finalEng]
       };
+
     }
 
     renderQuiz();
   </script>
 </body>
-
 </html>
