@@ -1,0 +1,286 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>나는누구인가</title>
+  <style>
+    :root{
+      --bg:#0b0d12; --card:#121621; --muted:#9aa3b2; --text:#e9edf5;
+      --line:#232a3a; --accent:#6aa6ff; --wood:#7be27b; --fire:#ff6b6b;
+      --earth:#ffcc66; --metal:#d1d5db; --water:#4facfe;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 0%, #121a2a 0%, var(--bg) 55%) fixed;
+      color:var(--text); line-height:1.6;
+    }
+    .wrap{ max-width: 650px; margin: 0 auto; padding: 40px 18px 100px; }
+    header{ text-align: center; margin-bottom: 40px; }
+    h1{ font-size: 26px; letter-spacing: -0.5px; margin:0; }
+    .sub{ color: var(--muted); font-size: 15px; margin-top: 10px; }
+
+    /* Progress UI */
+    .prog-wrap{ margin-bottom: 30px; }
+    .prog-bar{ height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+    .prog-fill{ height: 100%; background: var(--accent); width: 0%; transition: width 0.4s ease; }
+    .prog-text{ text-align: right; font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+    /* Quiz Card */
+    .q-card{ display: none; }
+    .q-card.active{ display: block; animation: slideIn 0.4s ease-out; }
+    @keyframes slideIn { from{ opacity:0; transform:translateY(15px); } to{ opacity:1; transform:translateY(0); } }
+
+    .card{ background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    .q-label{ font-size: 13px; color: var(--accent); font-weight: 800; margin-bottom: 6px; display: block; }
+    .q-title{ font-weight: 700; font-size: 19px; margin-bottom: 24px; letter-spacing: -0.4px; }
+    .opts{ display: grid; gap: 12px; }
+    .opt{
+      display: flex; align-items: center; gap: 14px; padding: 18px;
+      border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,0.02);
+      cursor: pointer; transition: 0.2s;
+    }
+    .opt:hover{ border-color: var(--accent); background: rgba(106,166,255,0.08); }
+    .opt input{ width: 20px; height: 20px; accent-color: var(--accent); }
+
+    /* Result UI (Enhanced) */
+    .res-section{ display: none; }
+    .res-card{ background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 35px; }
+    .res-header{ text-align: center; margin-bottom: 30px; }
+    .res-badge-row{ display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
+    .badge{ padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); }
+    .h-line{ font-size: 24px; font-weight: 800; margin: 15px 0; color: #fff; }
+    
+    .res-content{ margin-top: 30px; text-align: left; }
+    .desc-box{ background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    .label{ font-size: 13px; color: var(--accent); font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
+    .point-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+    .point-card{ padding: 15px; border-radius: 12px; border: 1px solid var(--line); }
+    .point-card.good{ border-left: 4px solid var(--wood); }
+    .point-card.shadow{ border-left: 4px solid var(--fire); }
+    .advice-box{ border-top: 1px dashed var(--line); padding-top: 20px; font-style: italic; color: var(--muted); }
+
+    /* Algorithm Section */
+    .algo-box{ margin-top: 40px; border: 1px solid var(--line); border-radius: 16px; padding: 20px; font-size: 13px; color: var(--muted); }
+    .btn-retry{ width: 100%; margin-top: 30px; background: var(--accent); color: #000; border: none; padding: 18px; border-radius: 14px; font-weight: 800; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header id="quiz-header">
+      <h1>두유노우유?</h1>
+      <p class="sub">솔직하고 퀵하게 답해보시오</p>
+    </header>
+
+    <div class="prog-wrap" id="prog-wrap">
+      <div class="prog-bar"><div id="prog-fill" class="prog-fill"></div></div>
+      <div id="prog-text" class="prog-text">1 / 12</div>
+    </div>
+
+    <div id="quiz-container"></div>
+
+    <div id="res-section" class="res-section">
+      <div class="res-card">
+        <div class="res-header">
+          <div class="res-badge-row" id="res-badges"></div>
+          <p id="res-code" style="font-family:monospace; font-size:11px; color:var(--muted);"></p>
+          <h2 class="h-line" id="res-headline"></h2>
+        </div>
+
+        <div class="res-content">
+          <div class="desc-box">
+            <div class="label">Analysis</div>
+            <p id="res-desc" style="margin:0; font-size: 15px;"></p>
+          </div>
+
+          <div class="point-grid">
+            <div class="point-card good">
+              <div class="label" style="color:var(--wood)">Strengths</div>
+              <ul id="res-strengths" style="padding-left:18px; margin:0; font-size:14px;"></ul>
+            </div>
+            <div class="point-card shadow">
+              <div class="label" style="color:var(--fire)">Shadow</div>
+              <p id="res-shadow" style="margin:0; font-size:14px;"></p>
+            </div>
+          </div>
+
+          <div class="advice-box">
+            <strong>조언한마디 툭:</strong> <span id="res-advice"></span>
+          </div>
+        </div>
+
+        <div class="algo-box">
+          <div class="label">Data Model: Abstracted Saju 3-Axis</div>
+          본 테스트는 사용자의 선택을 오행(본질 엔진), 음양(표현 밀도), 결정 엔진(주도성)의 3가지 피처로 변환하여 사주기반 매트릭스로 분류합니다.
+        </div>
+        <button class="btn-retry" onclick="location.reload()">테스트 다시하기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CHARACTERS = {
+      "WOOD_YANG_DRIVE": { hl: "시작의 냄새를 맡으면 몸이 먼저 움직이는 ‘개척 가속형’", desc: "가능성이 보이면 가만있지 못해요. “일단 열어두면 길이 생긴다”는 방식으로 판을 만들고, 주변 사람을 끌어당기며 확장합니다. 사주로 치면 ‘기운을 밖으로 뻗는 목’이라 속도가 강점이지만, 속도가 곧 부담이 되기도 해요.", s: ["실행으로 기회를 만든다", "새 판에서 압도적으로 빠르다"], sh: "브레이크 없이 달려 번아웃/관계 마찰이 생길 수 있다", adv: "“확장”을 멈추기보다 확장 속도를 ‘주간 단위’로 조절하세요." },
+      "WOOD_YANG_ACCEPT": { hl: "기회를 ‘사람·상황’에 붙여 키우는 ‘확장 네비게이터형’", desc: "당신은 성장 자체보다 성장이 일어날 수 있는 연결을 잘 봐요. 판을 뒤집기보다 판의 경로를 바꾸는 쪽에 강합니다. 사주적으로는 뻗는 목의 기세에 “상황 적응력”이 섞여, 큰 흐름을 타면 급격히 커집니다.", s: ["기회를 네트워킹/환경에 연결한다", "변화에 유연하다"], sh: "방향 전환이 잦아 “일관성 부족”으로 보일 수 있다", adv: "바꾸더라도 ‘핵심 목표 1개’는 고정해두면 폭발력이 생깁니다." },
+      "WOOD_YIN_DRIVE": { hl: "겉으론 조용한데, 결심하면 무섭게 밀어붙이는 ‘압축 성장형’", desc: "당신은 준비의 시간에 강해요. 티가 안 나게 뿌리를 내리고, 확신이 생기는 순간에만 움직입니다. ‘음목’ 특유의 축적력 때문에, 한번 가속이 붙으면 오래 갑니다. 다만 “언제 움직일지”를 너무 늦게 잡으면 기회를 놓칠 수 있어요.", s: ["준비로 리스크를 줄인다", "한 번 정하면 끝까지 간다"], sh: "타이밍을 놓칠 수 있고 시작이 늦어질 수 있다", adv: "준비를 끝내려 하지 말고 ‘첫 실행 기준’을 미리 정해두기." },
+      "WOOD_YIN_ACCEPT": { hl: "천천히 자라되, 길을 바꾸는 데 주저 없는 ‘유연한 성장형’", desc: "당신의 성장은 “한 번에 확”이 아니라 꾸준히 누적되는 방식이에요. 상황이 변하면 방향을 트는 것도 자연스럽고, 결과적으로 오래 버팁니다. 사주적으론 ‘음목’의 생장력에 ‘흐름 읽기’가 섞여서, 장기전에서 강합니다.", s: ["지속력이 강하다", "변화에 유연하게 적응한다"], sh: "속도가 느려 보이거나 결단이 약해 보일 수 있다", adv: "스스로를 몰아붙이기보다 ‘월간 성과’로 성장감을 가시화하세요." },
+      "FIRE_YANG_DRIVE": { hl: "사람 앞에서 판을 당기는 ‘무대 장악형’", desc: "반응이 오면 더 뜨거워지고, 그 열로 결정을 만들어냅니다. 사주적으로 ‘양화’는 “드러낼수록 강해지는 불”이라, 리더십·설득·주도권에서 장점이 커요. 다만 과열되면 말과 행동이 앞서기 쉽습니다.", s: ["존재감으로 팀을 움직인다", "결정을 밀어붙인다"], sh: "과열되면 강압적/과시적으로 비칠 수 있다", adv: "주도할수록 “상대의 한마디”를 먼저 받아주는 루틴을 넣어보세요." },
+      "FIRE_YANG_ACCEPT": { hl: "분위기를 읽고 흐름을 타는 ‘반응 설계형’", desc: "당신은 “내가 하고 싶은 말”보다 “지금 이 장면에 필요한 말”을 잘 골라요. 그래서 사람들과 함께 있을 때 빛납니다. 사주적으로는 불의 확산력에 ‘현장 적응’이 붙어, 관계/조직에서 센스가 강해요. 단, 기준이 약해지면 피곤해집니다.", s: ["공감과 센스로 분위기를 바꾼다", "현장 대응이 빠르다"], sh: "사람 반응에 휘둘리면 자기 중심이 흐려진다", adv: "중요한 선택 앞에선 ‘나의 기준 한문장’을 먼저 적고 들어가세요." },
+      "FIRE_YIN_DRIVE": { hl: "조용히 타오르다가 한 번에 뒤집는 ‘결정적 한방형’", desc: "평소엔 절제되어 보이지만, 마음속에 열이 쌓입니다. 그리고 “이때다” 싶으면 나서서 장면을 바꿔요. 사주적으로 ‘음화’는 은근한 불이라, 감정과 의지가 깊습니다. 다만 속내를 숨기다 오해를 살 수 있어요.", s: ["임팩트 있는 한 수", "깊이 있는 감정 에너지"], sh: "표현이 늦어 오해가 생길 수 있다", adv: "큰 결심 전에 ‘중간 신호’(티저)를 한 번은 던져주세요." },
+      "FIRE_YIN_ACCEPT": { hl: "감정의 결을 읽고 관계를 살리는 ‘온도 조율형’", desc: "당신은 “누가 지금 힘든지/어디가 차가운지”를 잘 느껴요. 그래서 관계 속에서 방향을 잡고, 불필요한 마찰을 줄입니다. 사주적으로 ‘음화+수용’은 사람의 마음을 살리는 힘이 있지만, 자기 욕구를 뒤로 미루면 소진됩니다.", s: ["섬세한 공감", "관계 회복/유지력"], sh: "자기 기준이 약해지고 눈치가 과해질 수 있다", adv: "“배려” 전에 내가 원하는 것 하나를 먼저 말하는 연습을 해보세요." },
+      "EARTH_YANG_DRIVE": { hl: "혼란을 보면 바로 정리하는 ‘현장 수습형’", desc: "당신은 안정이 깨지면 몸이 먼저 반응합니다. 앞에 서서 정리하고, 책임을 지며, 사람들에게 “괜찮다”는 바닥을 깔아요. 사주적으로 토의 중심 기운이 강하게 밖으로 나오는 형태라, 위기에서 진가가 큽니다.", s: ["위기 수습력", "책임감과 실행력"], sh: "떠안다가 지치거나 통제적으로 보일 수 있다", adv: "안정은 혼자 만드는 게 아니라 역할을 쪼개서 나누는 기술이 필요합니다." },
+      "EARTH_YANG_ACCEPT": { hl: "다들 편해지게 만드는 ‘실무 조율형’", desc: "당신은 균형점을 잘 찾아요. 누가 무엇을 힘들어하는지 보고, 실무적으로 조정해 “돌아가게” 만드는 타입. 사주적으로는 토의 유지력에 ‘상황 대응’이 붙어, 운영/관리/조율에서 매우 강합니다. 단, 결정이 늦다는 평가를 받을 수 있어요.", s: ["조율 능력", "운영 감각"], sh: "결단이 늦고 우선순위가 흐려질 수 있다", adv: "조율 전에 우선순위 1~3을 공개해버리면 빨라집니다." },
+      "EARTH_YIN_DRIVE": { hl: "말없이 버티다가 결정적인 순간에 버팀목이 되는 ‘무게 중심형’", desc: "쉽게 흔들리지 않고, 감정을 티내지 않으며, 필요한 순간 단호해져요. 사주적으론 ‘음토’의 축적력이 “결단”과 결합되어, 신뢰가 쌓입니다. 다만 속마음을 숨기면 주변이 당신을 읽기 어려워요.", s: ["신뢰감", "위기에서 단단함"], sh: "감정 공유가 적어 거리감이 생길 수 있다", adv: "결단의 순간만큼은 왜 그런지 ‘한 문장 이유’를 함께 남겨주세요." },
+      "EARTH_YIN_ACCEPT": { hl: "티 안 나게 팀을 살리는 ‘그림자 기반형’", desc: "당신은 앞에 나서기보다 뒤에서 받쳐요. 조직이 무너지지 않게 바닥을 다지고, 누군가 넘어지지 않게 미리 막습니다. 사주적으로 ‘음토+수용’은 “장기 유지”에 강하지만, 성과가 드러나지 않아 허무해질 수 있어요.", s: ["안정감", "지속적 지원"], sh: "존재감이 묻히고 공로가 인식되지 않을 수 있다", adv: "기여를 기록하세요. “나는 뭘 지켰는가”가 당신의 성과입니다." },
+      "METAL_YANG_DRIVE": { hl: "애매함을 못 참는 ‘즉결 기준형’", desc: "기준이 서지 않으면 답답하고, 결론이 나면 시원합니다. 사주적으로 ‘양금’은 날이 선 칼처럼 명료해서, 판단/결정/정리에 강해요. 다만 직설이 상처가 될 수 있습니다.", s: ["결단력", "명확한 판단"], sh: "말이 차갑게 들릴 수 있다", adv: "결론을 말하기 전에 상대의 의도 한번만 확인해도 부드러워집니다." },
+      "METAL_YANG_ACCEPT": { hl: "기준을 세우되 상황을 반영하는 ‘현실 규칙형’", desc: "원칙만 고집하지 않고, 현실을 보고 조정합니다. 그래서 “사람을 살리는 규칙”을 만들 수 있어요. 사주적으로 금의 정리력에 ‘유연성’이 붙은 타입이라, 제도/프로세스 설계에 강합니다. 단, 외부에서 우유부단으로 오해받을 수 있어요.", s: ["유연한 판단", "정리/제도 감각"], sh: "눈치로 기준이 흔들리면 스스로 불만이 쌓인다", adv: "조정할 때 바꿀 수 있는 것/없는 것을 먼저 선언하세요." },
+      "METAL_YIN_DRIVE": { hl: "완성도를 위해 조용히 다듬다가 단호해지는 ‘정밀 결단형’", desc: "겉으로는 조용하지만, 내부 기준이 높고 디테일을 놓치지 않아요. 사주적으로 ‘음금’은 정교한 칼이라, 품질/리스크/정합성에 강합니다. 다만 기준이 높아 스스로 피곤해질 수 있어요.", s: ["정확성", "책임 있는 선택"], sh: "완벽주의로 속도가 늦어질 수 있다", adv: "“완벽” 대신 ‘재작업 없는 80%’를 목표로 잡아보세요." },
+      "METAL_YIN_ACCEPT": { hl: "논리로 끝까지 맞추는 ‘정합 최적화형’", desc: "당신은 “왜?”를 끝까지 파고들며, 겉보기보다 구조를 중요시합니다. 사주적으로 금의 정리력에 수용이 결합되면, 문제를 ‘해결’하는 게 아니라 ‘맞게’ 만듭니다. 단, 실행이 늦어 보일 수 있어요.", s: ["분석력", "깊이 있는 문제 해결"], sh: "생각이 길어 실행이 미뤄질 수 있다", adv: "분석의 끝을 ‘다음 한 걸음’으로 끊어내는 습관이 필요합니다." },
+      "WATER_YANG_DRIVE": { hl: "변화의 조짐을 먼저 잡고 선수를 치는 ‘전략 선행형’", desc: "당신은 흐름을 빨리 감지하고, 남들이 확신하기 전에 움직입니다. 사주적으로 수의 기운이 밖으로 튀어나오면 “선제 대응”이 강해요. 다만 방향 전환이 잦으면 주변이 불안해할 수 있습니다.", s: ["빠른 맥락 파악", "선제 전략"], sh: "방향 전환 속도가 빨라 신뢰가 흔들릴 수 있다", adv: "방향을 바꿀 때마다 ‘왜 바꾸는지’ 설명 한마디를 공유하면 팀이 따라옵니다." },
+      "WATER_YANG_ACCEPT": { hl: "맥락에 맞게 유연하게 살아남는 ‘흐름 적응형’", desc: "당신은 “정답”보다 “지금 맞는 답”을 찾습니다. 사주적으론 물의 유연함이 강해, 변화 속에서 강하지만, 자기 색이 흐려질 수 있어요.", s: ["적응력", "상황 판단"], sh: "자기 방향성이 약해지고 휘둘릴 수 있다", adv: "유연함을 유지하되 ‘내가 지키는 1가지 원칙’을 정해두세요." },
+      "WATER_YIN_DRIVE": { hl: "오래 관찰하고 한 번에 정확히 찌르는 ‘잠수 저격형’", desc: "말이 적고, 생각이 깊고, 타이밍을 봅니다. 그리고 결정 순간에 핵심만 찔러요. 사주적으로 ‘음수’는 깊은 물이라 통찰이 강하지만, 사람들은 당신이 뭘 생각하는지 모를 수 있어요.", s: ["통찰력", "정확한 타격"], sh: "속을 알기 어려워 협업에서 오해가 생길 수 있다", adv: "결론을 내기 전 “지금까지 본 것”을 10초만 공유해도 신뢰가 올라갑니다." },
+      "WATER_YIN_ACCEPT": { hl: "큰 흐름 속에서 자연스러운 답을 기다리는 ‘대세 관조형’", desc: "당신은 급하게 결론내기보다, 전체 그림이 맞춰질 때까지 기다립니다. 사주적으로 깊은 수가 수용과 결합되면 “장기 최적”에 강해요. 다만 결정이 늦어질 수 있습니다.", s: ["큰 그림", "안정적인 판단"], sh: "결정을 미루다 기회가 지나갈 수 있다", adv: "완벽한 타이밍을 기다리기보다 ‘작은 실행’으로 흐름을 먼저 만들기." }
+    };
+
+    const QUESTIONS = [
+      { id: "Q1", title: "새로운 환경에 던져졌을 때, 가장 먼저 드는 생각은?", options: [{k:"A", t:"“이걸 내가 어떻게 키워볼 수 있을까”"}, {k:"B", t:"“여기서 내가 빛날 포인트는 뭘까”"}, {k:"C", t:"“중심을 잡아줄 사람이 필요하겠네”"}, {k:"D", t:"“일단 구조부터 파악해야겠다”"}] },
+      { id: "Q2", title: "당신이 가장 만족감을 느끼는 순간은?", options: [{k:"A", t:"무언가가 눈에 띄게 성장했을 때"}, {k:"B", t:"사람들이 내 반응에 반응할 때"}, {k:"C", t:"주변이 안정됐다고 느껴질 때"}, {k:"D", t:"기준이 명확해졌을 때"}] },
+      { id: "Q3", title: "문제가 생겼을 때 당신의 1차 반응은?", options: [{k:"A", t:"새로운 방향을 시도해본다"}, {k:"B", t:"감정을 드러내며 분위기를 바꾼다"}, {k:"C", t:"중간에서 조율한다"}, {k:"D", t:"원인과 규칙을 따진다"}] },
+      { id: "Q4", title: "당신이 오래 끌리는 역할은?", options: [{k:"A", t:"시작을 여는 사람"}, {k:"B", t:"앞에 서서 드러나는 사람"}, {k:"C", t:"버팀목이 되는 사람"}, {k:"D", t:"판단과 결정을 맡는 사람"}] },
+      { id: "Q5", title: "타인이 당신에게 자주 하는 말은?", options: [{k:"A", t:"“넌 계속 뭘 해보려 해”"}, {k:"B", t:"“넌 분위기를 확 바꿔”"}, {k:"C", t:"“너 있어서 다행이야”"}, {k:"D", t:"“너 말이 기준이야”"}] },
+      { id: "Q6", title: "자유 시간이 생겼을 때 더 끌리는 쪽은?", options: [{k:"A", t:"새로운 계획 구상"}, {k:"B", t:"사람 만나고 이야기"}, {k:"C", t:"정리·정돈"}, {k:"D", t:"분석·정리된 콘텐츠"}] },
+      { id: "Q7", title: "생각이 들었을 때 더 가까운 쪽은?", options: [{k:"A", t:"바로 말하거나 행동한다"}, {k:"B", t:"한 번 더 생각하고 움직인다"}] },
+      { id: "Q8", title: "에너지가 충전되는 순간은?", options: [{k:"A", t:"바깥 활동 후"}, {k:"B", t:"혼자 정리하는 시간"}] },
+      { id: "Q9", title: "상황이 답답할 때 당신은?", options: [{k:"A", t:"내가 먼저 움직여 판을 바꾼다"}, {k:"B", t:"흐름을 읽고 조정한다"}] },
+      { id: "Q10", title: "결정 필요한 순간, 더 편한 쪽은?", options: [{k:"A", t:"빠르게 정하고 책임진다"}, {k:"B", t:"최적의 타이밍을 기다린다"}] },
+      { id: "Q11", title: "당신과 더 닮은 문장은?", options: [{k:"A", t:"“변화는 내가 만든다”"}, {k:"B", t:"“안정은 내가 지킨다”"}] },
+      { id: "Q12", title: "마지막으로 더 마음이 가는 쪽은?", options: [{k:"A", t:"앞으로 나아가는 이미지"}, {k:"B", t:"안에서 다져지는 이미지"}] }
+    ];
+
+    const SCORE_RULES = {
+      "Q1_A": { elements:{WOOD:1} }, "Q1_B": { elements:{FIRE:1} }, "Q1_C": { elements:{EARTH:1} }, "Q1_D": { elements:{METAL:1, WATER:0.5} },
+      "Q2_A": { elements:{WOOD:1} }, "Q2_B": { elements:{FIRE:1} }, "Q2_C": { elements:{EARTH:1} }, "Q2_D": { elements:{METAL:1, WATER:0.5} },
+      "Q3_A": { elements:{WOOD:1, WATER:0.5} }, "Q3_B": { elements:{FIRE:1} }, "Q3_C": { elements:{EARTH:1} }, "Q3_D": { elements:{METAL:1, WATER:0.5} },
+      "Q4_A": { elements:{WOOD:1} }, "Q4_B": { elements:{FIRE:1} }, "Q4_C": { elements:{EARTH:1} }, "Q4_D": { elements:{METAL:1} },
+      "Q5_A": { elements:{WOOD:1} }, "Q5_B": { elements:{FIRE:1} }, "Q5_C": { elements:{EARTH:1} }, "Q5_D": { elements:{METAL:1} },
+      "Q6_A": { elements:{WOOD:1, WATER:0.5} }, "Q6_B": { elements:{FIRE:1} }, "Q6_C": { elements:{EARTH:1} }, "Q6_D": { elements:{WATER:1, METAL:0.5} },
+      "Q7_A": { yinYang:{YANG:1} }, "Q7_B": { yinYang:{YIN:1} }, "Q8_A": { yinYang:{YANG:1} }, "Q8_B": { yinYang:{YIN:1} },
+      "Q9_A": { engine:{DRIVE:1} }, "Q9_B": { engine:{ACCEPT:1} }, "Q10_A": { engine:{DRIVE:1} }, "Q10_B": { engine:{ACCEPT:1} },
+      "Q11_A": { elements:{WOOD:0.5, FIRE:0.5, WATER:0.5}, engine:{DRIVE:0.5}, yinYang:{YANG:0.25} }, "Q11_B": { elements:{EARTH:0.5, METAL:0.5}, engine:{ACCEPT:0.25} },
+      "Q12_A": { yinYang:{YANG:1}, engine:{DRIVE:0.5} }, "Q12_B": { yinYang:{YIN:1}, engine:{ACCEPT:0.5} }
+    };
+
+    let currentStep = 0;
+    const userAnswers = {};
+
+    function renderQuiz() {
+      const container = document.getElementById("quiz-container");
+      container.innerHTML = "";
+      
+      QUESTIONS.forEach((q, idx) => {
+        const card = document.createElement("div");
+        card.className = `q-card ${idx === currentStep ? 'active' : ''}`;
+        card.innerHTML = `
+          <div class="card">
+            <span class="q-label">FEATURE EXTRACTION ${idx + 1}</span>
+            <div class="q-title">${q.title}</div>
+            <div class="opts">
+              ${q.options.map(opt => `
+                <label class="opt">
+                  <input type="radio" name="${q.id}" value="${opt.k}" onchange="handleSelect('${q.id}', '${opt.k}')">
+                  <span>${opt.t}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      updateProgress();
+    }
+
+    window.handleSelect = function(qid, val) {
+      userAnswers[qid] = val;
+      if (currentStep < QUESTIONS.length - 1) {
+        setTimeout(() => { currentStep++; renderQuiz(); }, 350);
+      } else {
+        setTimeout(showResult, 400);
+      }
+    };
+
+    function updateProgress() {
+      const fill = document.getElementById("prog-fill");
+      const text = document.getElementById("prog-text");
+      const percent = (currentStep / QUESTIONS.length) * 100;
+      fill.style.width = `${percent}%`;
+      text.textContent = `${currentStep + 1} / ${QUESTIONS.length}`;
+    }
+
+    function showResult() {
+      document.getElementById("prog-wrap").style.display = "none";
+      document.getElementById("quiz-container").style.display = "none";
+      document.getElementById("quiz-header").style.display = "none";
+      
+      const res = calculateScores();
+      const char = CHARACTERS[res.code];
+      
+      document.getElementById("res-code").textContent = `FEATURE_VECTOR: ${res.code}`;
+      document.getElementById("res-headline").textContent = char.hl;
+      document.getElementById("res-desc").textContent = char.desc;
+      document.getElementById("res-shadow").textContent = char.sh;
+      document.getElementById("res-advice").textContent = char.adv;
+      
+      const strengths = document.getElementById("res-strengths");
+      strengths.innerHTML = char.s.map(s => `<li>${s}</li>`).join('');
+
+      const badges = document.getElementById("res-badges");
+      badges.innerHTML = `
+        <span class="badge" style="color:var(--${res.el.toLowerCase()}); border-color:var(--${res.el.toLowerCase()})">${res.elLabel}</span>
+        <span class="badge">${res.yyLabel}</span>
+        <span class="badge">${res.engLabel}</span>
+      `;
+      
+      document.getElementById("res-section").style.display = "block";
+    }
+
+    function calculateScores() {
+      const el = { WOOD:0, FIRE:0, EARTH:0, METAL:0, WATER:0 };
+      const yy = { YANG:0, YIN:0 };
+      const eng = { DRIVE:0, ACCEPT:0 };
+
+      for (const [qid, val] of Object.entries(userAnswers)) {
+        const rule = SCORE_RULES[`${qid}_${val}`];
+        if (rule.elements) for (const [k,v] of Object.entries(rule.elements)) el[k] += v;
+        if (rule.yinYang) for (const [k,v] of Object.entries(rule.yinYang)) yy[k] += v;
+        if (rule.engine) for (const [k,v] of Object.entries(rule.engine)) eng[k] += v;
+      }
+
+      const pickMax = (obj, tie) => {
+        let max = -Infinity, cand = [];
+        for (const [k,v] of Object.entries(obj)) {
+          if (v > max) { max = v; cand = [k]; }
+          else if (v === max) cand.push(k);
+        }
+        return cand.length === 1 ? cand[0] : tie.find(t => cand.includes(t));
+      };
+
+      const finalEl = pickMax(el, ["WATER","METAL","EARTH","WOOD","FIRE"]);
+      const finalYY = pickMax(yy, ["YANG","YIN"]);
+      const finalEng = pickMax(eng, ["DRIVE","ACCEPT"]);
+
+      const labels = {
+        WOOD:"🌱 목(木)", FIRE:"🔥 화(火)", EARTH:"🪨 토(土)", METAL:"⚙️ 금(金)", WATER:"🌊 수(수)",
+        YANG:"양(陽)", YIN:"음(陰)", DRIVE:"추진형(Drive)", ACCEPT:"수용형(Accept)"
+      };
+
+      return {
+        code: `${finalEl}_${finalYY}_${finalEng}`, el: finalEl,
+        elLabel: labels[finalEl], yyLabel: labels[finalYY], engLabel: labels[finalEng]
+      };
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
