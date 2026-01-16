@@ -144,12 +144,65 @@
     };
 
     const QUESTIONS = [
-      { id: "Q1", title: "새로운 환경에 던져졌을 때, 가장 먼저 드는 생각은?", options: [{k:"A", t:"“이걸 내가 어떻게 키워볼 수 있을까”"}, {k:"B", t:"“여기서 내가 빛날 포인트는 뭘까”"}, {k:"C", t:"“중심을 잡아줄 사람이 필요하겠네”"}, {k:"D", t:"“일단 구조부터 파악해야겠다”"}] },
-      { id: "Q2", title: "당신이 가장 만족감을 느끼는 순간은?", options: [{k:"A", t:"무언가가 눈에 띄게 성장했을 때"}, {k:"B", t:"사람들이 내 반응에 반응할 때"}, {k:"C", t:"주변이 안정됐다고 느껴질 때"}, {k:"D", t:"기준이 명확해졌을 때"}] },
-      { id: "Q3", title: "문제가 생겼을 때 당신의 1차 반응은?", options: [{k:"A", t:"새로운 방향을 시도해본다"}, {k:"B", t:"감정을 드러내며 분위기를 바꾼다"}, {k:"C", t:"중간에서 조율한다"}, {k:"D", t:"원인과 규칙을 따진다"}] },
-      { id: "Q4", title: "당신이 오래 끌리는 역할은?", options: [{k:"A", t:"시작을 여는 사람"}, {k:"B", t:"앞에 서서 드러나는 사람"}, {k:"C", t:"버팀목이 되는 사람"}, {k:"D", t:"판단과 결정을 맡는 사람"}] },
-      { id: "Q5", title: "타인이 당신에게 자주 하는 말은?", options: [{k:"A", t:"“넌 계속 뭘 해보려 해”"}, {k:"B", t:"“넌 분위기를 확 바꿔”"}, {k:"C", t:"“너 있어서 다행이야”"}, {k:"D", t:"“너 말이 기준이야”"}] },
-      { id: "Q6", title: "자유 시간이 생겼을 때 더 끌리는 쪽은?", options: [{k:"A", t:"새로운 계획 구상"}, {k:"B", t:"사람 만나고 이야기"}, {k:"C", t:"정리·정돈"}, {k:"D", t:"분석·정리된 콘텐츠"}] },
+    id: "Q1",
+    title: "새로운 환경에 던져졌을 때, 가장 먼저 드는 생각은?",
+    options: [
+      {k:"A", t:"“이거… 판을 키울 구멍이 보이네”"},                 // 목
+      {k:"B", t:"“첫인상은 지금 결정돼. 분위기부터 잡자”"},            // 화
+      {k:"C", t:"“흔들리지 않게 먼저 받쳐야겠다”"},                   // 토
+      {k:"D", t:"“지금 중요한 기준부터 세워두자”"},                    // 금
+    ]
+  },
+  {
+    id: "Q2",
+    title: "당신이 가장 만족감을 느끼는 순간은?",
+    options: [
+      {k:"A", t:"눈에 띄게 성장한 게 보일 때"},                        // 목
+      {k:"B", t:"내 말/행동에 반응이 확 돌아올 때"},                    // 화
+      {k:"C", t:"애매함이 정리되고 결론이 또렷해질 때"},                 // 금
+      {k:"D", t:"전체 흐름이 읽혀서 다음 수가 떠오를 때"}               // 수
+    ]
+  },
+  {
+    id: "Q3",
+    title: "문제가 생겼을 때 당신의 1차 반응은?",
+    options: [
+      {k:"A", t:"분위기를 전환해 흐름을 다시 만든다"},                  // 화
+      {k:"B", t:"중간에서 조율해 충돌을 줄인다"},                       // 토
+      {k:"C", t:"원인부터 정리해서 빠르게 결론을 만든다"},               // 금
+      {k:"D", t:"바로 확정하지 않고 한 템포 보고 판단한다"}              // 수
+    ]
+  },
+  {
+    id: "Q4",
+    title: "낯선 상황에 던져졌을 때, 내가 제일 먼저 신경 쓰는 건?",
+    options: [
+      { k:"A", t:"‘여기서 더 키울 여지가 있나?’" },                       // 목
+      { k:"B", t:"‘지금 공기(분위기) 괜찮나?’" },                         // 화
+      { k:"C", t:"‘일단 무너지지 않게 굴러가나?’" },                       // 토
+      { k:"D", t:"‘지금 당장 잘라낼 건 뭐지?’" }                          // 금(선별/컷)
+    ]
+  },
+  {
+    id: "Q5",
+    title: "여럿이 일할 때, 내가 자연스럽게 맡는 역할에 가까운 건?",
+    options: [
+      { k:"A", t:"흐름을 읽고 리스크를 줄이는 타이밍을 잡는다"},           // 수
+      { k:"B", t:"새 판을 열거나, 다음 스텝을 먼저 꺼낸다" },              // 목
+      { k:"C", t:"정리·조율해서 ‘돌아가게’ 만든다" },                      // 토
+      { k:"D", t:"기준을 세우고 ‘이건/저건’을 빨리 가른다" }               // 금
+    ]
+  },
+  {
+    id: "Q6",
+    title: "갑자기 ‘24시간 미션’이 생겼다. 내 방식은?",
+    options: [
+      { k:"A", t:"일단 뛰어들고, 하면서 키운다" },                        // 목
+      { k:"B", t:"공유부터 해서 반응을 모으며 속도를 낸다" },              // 화
+      { k:"C", t:"체크리스트로 바닥을 깔고, 안정적으로 완주한다" },         // 토
+      { k:"D", t:"지금은 확정하지 않고, 정보 더 모아 최적 타이밍에 간다" }  // 수
+    ]
+  },
       { id: "Q7", title: "생각이 들었을 때 더 가까운 쪽은?", options: [{k:"A", t:"바로 말하거나 행동한다"}, {k:"B", t:"한 번 더 생각하고 움직인다"}] },
       { id: "Q8", title: "에너지가 충전되는 순간은?", options: [{k:"A", t:"바깥 활동 후"}, {k:"B", t:"혼자 정리하는 시간"}] },
       { id: "Q9", title: "상황이 답답할 때 당신은?", options: [{k:"A", t:"내가 먼저 움직여 판을 바꾼다"}, {k:"B", t:"흐름을 읽고 조정한다"}] },
@@ -159,12 +212,12 @@
     ];
 
     const SCORE_RULES = {
-      "Q1_A": { elements:{WOOD:1} }, "Q1_B": { elements:{FIRE:1} }, "Q1_C": { elements:{EARTH:1} }, "Q1_D": { elements:{METAL:1, WATER:0.5} },
-      "Q2_A": { elements:{WOOD:1} }, "Q2_B": { elements:{FIRE:1} }, "Q2_C": { elements:{EARTH:1} }, "Q2_D": { elements:{METAL:1, WATER:0.5} },
-      "Q3_A": { elements:{WOOD:1, WATER:0.5} }, "Q3_B": { elements:{FIRE:1} }, "Q3_C": { elements:{EARTH:1} }, "Q3_D": { elements:{METAL:1, WATER:0.5} },
+      "Q1_A": { elements:{WOOD:1} }, "Q1_B": { elements:{FIRE:1} }, "Q1_C": { elements:{EARTH:1} }, "Q1_D": { elements:{METAL:1} },
+      "Q2_A": { elements:{WOOD:1} }, "Q2_B": { elements:{FIRE:1} }, "Q2_C": { elements:{METAL:1} }, "Q2_D": { elements:{WATER:1} },
+      "Q3_A": { elements:{FIRE:1} }, "Q3_B": { elements:{EARTH:1} }, "Q3_C": { elements:{METAL:1} }, "Q3_D": { elements:{WATER:1} },
       "Q4_A": { elements:{WOOD:1} }, "Q4_B": { elements:{FIRE:1} }, "Q4_C": { elements:{EARTH:1} }, "Q4_D": { elements:{METAL:1} },
-      "Q5_A": { elements:{WOOD:1} }, "Q5_B": { elements:{FIRE:1} }, "Q5_C": { elements:{EARTH:1} }, "Q5_D": { elements:{METAL:1} },
-      "Q6_A": { elements:{WOOD:1, WATER:0.5} }, "Q6_B": { elements:{FIRE:1} }, "Q6_C": { elements:{EARTH:1} }, "Q6_D": { elements:{WATER:1, METAL:0.5} },
+      "Q5_A": { elements:{WATER:1} }, "Q5_B": { elements:{WOOD:1} }, "Q5_C": { elements:{EARTH:1} }, "Q5_D": { elements:{METAL:1} },
+      "Q6_A": { elements:{WOOD:1} }, "Q6_B": { elements:{FIRE:1} }, "Q6_C": { elements:{EARTH:1} }, "Q6_D": { elements:{WATER:1} },
       "Q7_A": { yinYang:{YANG:1} }, "Q7_B": { yinYang:{YIN:1} }, "Q8_A": { yinYang:{YANG:1} }, "Q8_B": { yinYang:{YIN:1} },
       "Q9_A": { engine:{DRIVE:1} }, "Q9_B": { engine:{ACCEPT:1} }, "Q10_A": { engine:{DRIVE:1} }, "Q10_B": { engine:{ACCEPT:1} },
       "Q11_A": { elements:{WOOD:0.5, FIRE:0.5, WATER:0.5}, engine:{DRIVE:0.5}, yinYang:{YANG:0.25} }, "Q11_B": { elements:{EARTH:0.5, METAL:0.5}, engine:{ACCEPT:0.25} },
@@ -270,7 +323,7 @@
       const finalEng = pickMax(eng, ["DRIVE","ACCEPT"]);
 
       const labels = {
-        WOOD:"🌱 목(木)", FIRE:"🔥 화(火)", EARTH:"🪨 토(土)", METAL:"⚙️ 금(金)", WATER:"🌊 수(수)",
+        WOOD:"🌱 목(木)", FIRE:"🔥 화(火)", EARTH:"🪨 토(土)", METAL:"⚙️ 금(金)", WATER:"🌊 수(水)",
         YANG:"양(陽)", YIN:"음(陰)", DRIVE:"추진형(Drive)", ACCEPT:"수용형(Accept)"
       };
 
@@ -283,4 +336,5 @@
     renderQuiz();
   </script>
 </body>
+
 </html>
