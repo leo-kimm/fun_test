@@ -430,10 +430,22 @@
         </button>
       `;
 
+        // === 캐릭터 이미지 테스트용 임시===
+      const url = `/fun_test/assets/chars/${res.code}.webp`;
+      console.log("[CHAR IMG]", res.code, url);
+      img.src = url;
+
+      img.onerror = () => {
+        console.log("[CHAR IMG ERROR]", url);
+        img.style.display = "none";
+      };
+
+
+
         // === 캐릭터 이미지 연결 (WEBP) ===
       const img = document.getElementById("res-char-img");
       img.style.display = "block";
-      img.src = `assets/chars/${res.code}.webp`;
+      img.src = `/fun_test/assets/chars/${res.code}.webp`;
 
       // 파일 누락/오타 대비: 로딩 실패 시 숨김
       img.onerror = () => {
@@ -441,7 +453,7 @@
       };
 
 
-      
+
       document.getElementById("res-section").style.display = "block";
     }
 
